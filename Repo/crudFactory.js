@@ -169,7 +169,6 @@ const AccountCrud = function(userTable, sessionTable, roleTable){
     });
 };
 
-
 module.exports = {
     BaseCrud: BaseCrud,
     AccountCrud: AccountCrud

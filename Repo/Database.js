@@ -1,13 +1,13 @@
 var mongoose = require("mongoose");
 
-var CrudFactory = require('crudFactory');
-var Schemas = require('Schemas');
+var CrudFactory = require('./crudFactory');
+var Schemas = require('./Schemas');
 
 
 var connString = process.env.connString || 'string';
 
-
 mongoose.connect(connString, { useNewUrlParser: true });
+const db = mongoose.connection;
 db.once('open', function() {
     console.log('db connected');
 });
