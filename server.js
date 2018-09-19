@@ -11,8 +11,6 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
 }));
 
-console.log(process.env);
-
 var port = process.env.PORT || 8080;
 
 app.use(express.static('./frontEnd/build'));

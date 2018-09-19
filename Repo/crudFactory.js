@@ -1,11 +1,18 @@
-var bcrypt = require("bcrypt");
+const bcrypt = require("bcrypt");
 const uuidv1 = require('uuid/v1');
 
-
+// forigens is an array of strings for use of including foreign table ref
 const BaseCrud = function(table){
     return({
-        get: function(callback) {
-            table.find().exec(function(err, result){
+        get: function(callback, foreignFields = null) {
+            const queery = table.find();
+            if(foreignFields){
+                foreignFields.map(function(foreignField){
+                    queery.populate(foreignField);
+                })
+            }
+
+            queery.exec(function(err, result){
                 if(err){
                     callback({error: true, reason: 'error searching table'});
                 } else {
@@ -13,17 +20,44 @@ const BaseCrud = function(table){
                 }
             });
         },
-        getPage: function(page, count, callback){
-            table.find().skip((page - 1) * count).limit(count).exec(function(err, result){
-               if(err){
-                   callback({error: true, reason: 'error searching table'});
-               } else {
-                   callback(result);
-               }
+        getPage: function(page, count, callback, foreignFields = null){
+            const queery = table.find();
+            if(foreignFields){
+                foreignFields.map(function(foreignField){
+                    queery.populate(foreignField);
+                })
+            }
+            queery.skip((page - 1) * count).limit(count).exec(function(err, result){
+                if(err){
+                    callback({error: true, reason: 'error searching table'});
+                } else {
+                    callback(result);
+                }
             });
         },
-        getById: function(id, callback){
-            table.findOne({_id: id}, function(err, result){
+        getByForeignKey: function(callback, field, id, foreignFields = null){
+            const queery = table.find({[field]: id});
+            if(foreignFields){
+                foreignFields.map(function(foreignField){
+                    queery.populate(foreignField);
+                })
+            }
+            queery.exec(function(err, result){
+                if(err){
+                    callback({error: true, reason: 'error searching table'});
+                } else {
+                    callback(result);
+                }
+            });
+        },
+        getById: function(id, callback, foreignFields = null){
+            const queery = table.findOne({_id: id});
+            if(foreignFields){
+                foreignFields.map(function(foreignField){
+                    queery.populate(foreignField);
+                })
+            }
+            queery.exec(function(err, result){
                 if(err){
                     callback({error: true, reason: 'could not find item in table'});
                 } else {
@@ -60,7 +94,7 @@ const BaseCrud = function(table){
                 }
             });
         },
-    })
+    });
 };
 
 const AccountCrud = function(userTable, sessionTable, roleTable){
