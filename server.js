@@ -22,7 +22,7 @@ app.use('/api', initialRouter);
 
 var Database = require('./Repo/Database');
 
-require('./Controller')(initialRouter, null);
+require('./Controller')(initialRouter, Database);
 
 
 app.listen(port, function(){
