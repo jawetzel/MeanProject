@@ -13,14 +13,16 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 
 var port = process.env.PORT || 8080;
 
-app.use(express.static('./frontEnd/build'));
+//app.use(express.static('./frontEnd/build'));
 
 
 var initialRouter = express.Router();
 app.use('/api', initialRouter);
 
+
 var Database = require('./Repo/Database');
 
+require('./Controller')(initialRouter, null);
 
 
 app.listen(port, function(){
