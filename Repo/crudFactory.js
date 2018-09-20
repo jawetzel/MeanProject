@@ -15,6 +15,8 @@ const BaseCrud = function(table){
             queery.exec(function(err, result){
                 if(err){
                     callback({error: true, reason: 'error searching table'});
+                } else if(!result){
+                    callback({error: true, reason: 'failed to find items'});
                 } else {
                     callback(result);
                 }
@@ -30,6 +32,8 @@ const BaseCrud = function(table){
             queery.skip((page - 1) * count).limit(count).exec(function(err, result){
                 if(err){
                     callback({error: true, reason: 'error searching table'});
+                } else if(!result){
+                    callback({error: true, reason: 'failed to find items'});
                 } else {
                     callback(result);
                 }
@@ -45,7 +49,9 @@ const BaseCrud = function(table){
             queery.exec(function(err, result){
                 if(err){
                     callback({error: true, reason: 'error searching table'});
-                } else {
+                } else if(!result){
+                    callback({error: true, reason: 'failed to find items'});
+                }  else {
                     callback(result);
                 }
             });
@@ -59,8 +65,10 @@ const BaseCrud = function(table){
             }
             queery.exec(function(err, result){
                 if(err){
-                    callback({error: true, reason: 'could not find item in table'});
-                } else {
+                    callback({error: true, reason: 'search error'});
+                } else if(!result){
+                    callback({error: true, reason: 'failed to find item'});
+                }  else {
                     callback(result);
                 }
             });
@@ -70,7 +78,9 @@ const BaseCrud = function(table){
             newObject.save(function(err, result){
                 if(err){
                     callback({error: true, reason: 'error creating table item'});
-                } else {
+                } else if(!result){
+                    callback({error: true, reason: 'error creating table item'});
+                }  else {
                     callback(result);
                 }
             });
@@ -78,6 +88,8 @@ const BaseCrud = function(table){
         update: function(model, callback) {
             table.findOneAndUpdate({_id: model._id}, {$set: model}, function (err, result) {
                 if(err){
+                    callback({error: true, reason: 'error updating table item'});
+                } else if(!result){
                     callback({error: true, reason: 'error updating table item'});
                 } else {
                     callback(result);
@@ -88,6 +100,8 @@ const BaseCrud = function(table){
         delete: function(model, callback) {
             table.findOneAndDelete({_id: model.id}).exec((err, result) => {
                 if(err){
+                    callback({error: true, reason: 'error deleting table item'});
+                } else if(!result){
                     callback({error: true, reason: 'error deleting table item'});
                 } else {
                     callback(result);
@@ -103,7 +117,9 @@ const AccountCrud = function(userTable, sessionTable, roleTable){
             sessionTable.findOne({token: model.data.token}).populate('user').exec((err, result) => {
                 if (err){
                     callback({error: true, reason: 'could not find session'});
-                } else {
+                } else if(!result){
+                    callback({error: true, reason: 'could not find session'});
+                } else{
                     const expireDate = result.date.getTime() + 480*60000;
                     if(new Date().getTime() > expireDate){
                         callback({error: true, reason: 'session expired'});
@@ -117,11 +133,14 @@ const AccountCrud = function(userTable, sessionTable, roleTable){
             userTable.findOne({ email: model.data.email }).exec((err, result) => {
                 if (err){
                     callback({error: true, reason: 'could not find user'});
+                } else if(!result){
+                    callback({error: true, reason: 'could not find user'});
                 } else {
                     bcrypt.compare(model.data.password, result.password, function (cryptErr, cryptResult){
                         if(cryptErr){
-                            return callback({error: true, reason: 'error comparing passwords'});
-
+                            callback({error: true, reason: 'error comparing passwords'});
+                        } else if(!cryptResult){
+                            callback({error: true, reason: 'error comparing passwords'});
                         } else {
                             let session = new sessionTable({
                                 token: uuidv1(),
@@ -130,10 +149,11 @@ const AccountCrud = function(userTable, sessionTable, roleTable){
                             session.save(function(err, result){
                                 if (err){
                                     callback({error: true, reason: 'error making token'});
+                                } else if(!result){
+                                    callback({error: true, reason: 'error making token'});
                                 } else {
                                     callback({token: result.token, roles: result.roles});
                                 }
-
                             });
                         }
                     });
@@ -145,16 +165,18 @@ const AccountCrud = function(userTable, sessionTable, roleTable){
             bcrypt.hash(user.password, 10, function(err, hash){
                 if(err){
                     callback({error: true, reason: 'hash error'});
-                }
-                else {
+                } else if(!hash){
+                    callback({error: true, reason: 'hash error'});
+                } else {
                     user.password = hash;
                     user.save(function(err, result){
-                        if (err){
+                        if (err) {
                             callback({error: true, reason: 'failed to save'});
-                        } else{
-                            if (result) callback(result);
+                        } else if (!result){
+                            callback({error: true, reason: 'failed to save'});
+                        } else {
+                            callback(result);
                         }
-
                     });
                 }
             });
@@ -162,27 +184,39 @@ const AccountCrud = function(userTable, sessionTable, roleTable){
         },
         addRole: function(userId, roleId, callback){
             userTable.findOne({_id: userId}).exec(function(userErr, user){
-                if(userErr) callback({success: false, reason: 'user not found'});
-                roleTable.findOne({_id: roleId}).exec(function (roleErr, role) {
-                    if(roleErr) callback({success: false, reason: 'role not found'});
-                    user.roles.push(role);
-                    user.save(function(saveErr, saveUser){
-                        if(saveErr){
-                            callback({success: false, reason: 'updateUserError'});
-                        } else {
-                            callback({success: true});
-                        }
+                if(userErr) {
+                    callback({error: true, reason: 'error searching user'});
+                } else if(!user){
+                    callback({error: true, reason: 'user not found'});
+                } else {
+                    roleTable.findOne({_id: roleId}).exec(function (roleErr, role) {
+                        if(roleErr) callback({success: false, reason: 'role not found'});
+                        user.roles.push(role);
+                        user.save(function(saveErr, saveUser){
+                            if(saveErr){
+                                callback({error: true, reason: 'updateUserError'});
+                            } else if(!saveUser){
+                                callback({error: true, reason: 'updateUserError'});
+                            } else {
+                                callback({success: true});
+                            }
+                        })
                     })
-                })
+                }
+
             })
         },
         changePassword: function(user, callback){
             userTable.findOne({_id: user._id}).exec(function(userErr, foundUser){
                 if(userErr){
+                    callback({error: true, reason: 'Search user Error'});
+                } else if(!foundUser){
                     callback({error: true, reason: 'Unable to find user'});
                 } else {
                     bcrypt.hash(user.password, 10, function(errHash, hash){
                         if(errHash){
+                            callback({error: true, reason: 'hash error'});
+                        } else if(!hash){
                             callback({error: true, reason: 'hash error'});
                         } else {
                             foundUser.hash = hash;
