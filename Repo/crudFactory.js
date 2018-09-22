@@ -98,7 +98,7 @@ const BaseCrud = function(table){
 
         },
         delete: function(model, callback) {
-            table.findOneAndDelete({_id: model.id}).exec((err, result) => {
+            table.findOneAndDelete({_id: model.id}).exec(function(err, result){
                 if(err){
                     callback({error: true, reason: 'error deleting table item'});
                 } else if(!result){

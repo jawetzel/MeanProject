@@ -11,14 +11,15 @@ var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 
 var port = process.env.PORT || 8080;
-server.listen(port);
+server.listen(port, function() {
+    console.log('running on port: ' + port);
+});
 
 app.use(cors());
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
 }));
-
 
 //Serve that front end
 app.use('/', express.static('./FrontEnd/public-portal/build/'));
