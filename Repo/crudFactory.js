@@ -161,26 +161,32 @@ const AccountCrud = function(userTable, sessionTable, roleTable){
             });
         },
         createUser: function(model, callback) {
-            let user = new userTable(model);
-            bcrypt.hash(user.password, 10, function(err, hash){
-                if(err){
-                    callback({error: true, reason: 'hash error'});
-                } else if(!hash){
-                    callback({error: true, reason: 'hash error'});
+            userTable.findOne({ email: model.data.email }).exec((err, result) => {
+                if(result){
+                    callback({error: true, reason: 'email already taken'});
                 } else {
-                    user.password = hash;
-                    user.save(function(err, result){
-                        if (err) {
-                            callback({error: true, reason: 'failed to save'});
-                        } else if (!result){
-                            callback({error: true, reason: 'failed to save'});
+                    let user = new userTable(model.data);
+                    bcrypt.hash(user.password, 10, function(err, hash){
+                        if(err){
+                            callback({error: true, reason: 'hash error'});
+                            console.log(err);
+                        } else if(!hash){
+                            callback({error: true, reason: 'hash error'});
                         } else {
-                            callback(result);
+                            user.password = hash;
+                            user.save(function(err, result){
+                                if (err) {
+                                    callback({error: true, reason: 'failed to save'});
+                                } else if (!result){
+                                    callback({error: true, reason: 'failed to save'});
+                                } else {
+                                    callback(result);
+                                }
+                            });
                         }
                     });
                 }
             });
-
         },
         addRole: function(userId, roleId, callback){
             userTable.findOne({_id: userId}).exec(function(userErr, user){

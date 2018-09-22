@@ -6,24 +6,50 @@ module.exports = function (router, db){
     });
 
     router.post('/login', function(req, res, next){
-        const invalids = validators.loginValidator(req.body);
-        if(invalids.length > 0){
-            res.send({error: true, reason: 'invalid fields', errors: invalids});
+        if(req.body && req.body.email && req.body.password){
+            const invalids = validators.loginValidator(req.body);
+            if(invalids.length > 0){
+                res.send({error: true, reason: 'invalid fields', errors: invalids});
+            } else {
+                db.UserCrud.login({
+                    data:{
+                        email: req.body.email,
+                        password: req.body.password
+                    }
+                }, function(response){
+                    if(response.error){
+                        res.send(response);
+                    } else {
+                        res.send('hi');
+                    }
+                });
+            }
         } else {
-            db.UserCrud.login({
-                data:{
-                    email: req.body.email,
-                    password: req.body.password
-                }
-            }, function(response){
-                console.log(response);
-                if(response.error){
-                    res.send(response);
-                } else {
-                    res.send('hi');
-                }
+            res.send({error: true, reason: 'missing fields, expected email and password'});
+        }
+    });
+    router.post('/register', function(req, res, next){
+        if(req.body && req.body.email && req.body.password){
+            const invalids = validators.loginValidator(req.body);
+            if(invalids.length > 0){
+                res.send({error: true, reason: 'invalid fields', errors: invalids});
+            } else {
+                db.UserCrud.createUser({
+                    data:{
+                        email: req.body.email,
+                        password: req.body.password
+                    }
+                }, function(response){
+                    if(response.error){
+                        res.send(response);
+                    } else {
+                        res.send({success: true});
+                    }
 
-            });
+                });
+            }
+        } else {
+            res.send({error: true, reason: 'missing fields, expected email and password'});
         }
     });
 };

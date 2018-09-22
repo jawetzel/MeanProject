@@ -1,19 +1,17 @@
 var mongoose = require("mongoose");
 
 const RoleSchema = mongoose.Schema({
-    role: String
+    role: { type : String , unique : true },
 });
 
 const UserSchema = mongoose.Schema({
-    name: String,
-    title: String,
-    description: String,
-    price: Number,
+    email: { type : String , unique : true, required : true },
+    password: { type : String , required : true },
     roles: [RoleSchema]
 });
 
 const SessionSchema = mongoose.Schema({
-    token: String,
+    token: { type : String },
     date: Date,
     user: {
         type: mongoose.Schema.Types.ObjectId,

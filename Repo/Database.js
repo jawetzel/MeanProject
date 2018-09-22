@@ -7,6 +7,7 @@ var Schemas = require('./Schemas');
 var connString = process.env.connString || 'string';
 
 mongoose.connect(connString, { useNewUrlParser: true });
+mongoose.set('useCreateIndex', true);
 const db = mongoose.connection;
 db.once('open', function() {
     console.log('db connected');
