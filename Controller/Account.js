@@ -1,5 +1,5 @@
-var AuthCheck = require('./AuthCheck');
-const Validation = require('../Validator');
+var AuthCheck = require('./utilities/AuthCheck');
+const Validation = require('./utilities/InputValidation');
 
 const endpoints = [  //endpoints needing auth go here, others will be let through without check
     {
@@ -14,7 +14,7 @@ module.exports = function (router, db){
         AuthCheck(endpoints, {req: req, res: res, next: next, db: db});
     });
 
-
+    
     router.post('/login', function(req, res, next){
         if(req.body && req.body.email && req.body.password){
             const invalids = validators.loginValidator(req.body);
@@ -76,7 +76,6 @@ module.exports = function (router, db){
 
 
 };
-
 
 
 const validators = {
