@@ -144,7 +144,8 @@ const AccountCrud = function(userTable, sessionTable, roleTable){
                         } else {
                             let session = new sessionTable({
                                 token: uuidv1(),
-                                date: new Date()
+                                date: new Date(),
+                                user: result
                             });
                             session.save(function(err, result){
                                 if (err){
