@@ -1,11 +1,11 @@
-module.exports = function(enxpoints, req){
-    let endpoint = req.endpoints.filter(x => x.method === req.req.method && x.url === req.req.url);
+module.exports = function(enxpoints, context){
+    let endpoint = enxpoints.filter(x => x.method === context.req.method && x.url === context.req.url);
     if(endpoint.length === 0){
-        req.next();
+        context.req.next();
         return;
     }
-    if (req.headers.session) {
-        req.db.UserCrud.checkToken({data: {token: req.headers.session}}, function (result) {
+    if (context.req.headers.session) {
+        context.db.UserCrud.checkToken({data: {token: context.req.headers.session}}, function (result) {
             var canAccess = false;
             if (result.user && result.user.roles){
                 endpoint[0].auth.map(function(auth){
@@ -13,8 +13,8 @@ module.exports = function(enxpoints, req){
                 });
             }
             if(canAccess){
-                req.next();
-            } else req.res.send({error: true, reason: 'Not Authorized To Access This Endpoint'});
+                context.next();
+            } else context.res.send({error: true, reason: 'Not Authorized To Access This Endpoint'});
         });
-    } else req.res.send({error: true, reason: 'Not Authorized To Access This Endpoint'});
+    } else context.res.send({error: true, reason: 'Not Authorized To Access This Endpoint'});
 };
