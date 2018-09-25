@@ -1,12 +1,16 @@
+const bcrypt = require("bcrypt");
+var faker = require('faker');
+
 var AuthCheck = require('../utilities/AuthCheck');
 const Validation = require('../utilities/InputValidation');
+var Email = require('../utilities/Email');
 
 const endpoints = [  //endpoints needing auth go here, others will be let through without check
     { method: 'GET', url: '/users', auth: ['Admin'] },
     { method: 'PUT', url: '/users', auth: ['Admin'] },
     { method: 'DELETE', url: '/users', auth: ['Admin'] },
 
-    { method: 'POST', url: '/grantRole', auth: ['Admin'] },
+    //{ method: 'POST', url: '/grantRole', auth: ['Admin'] },
     { method: 'POST', url: '/revokeRole', auth: ['Admin'] },
 
     { method: 'GET', url: '/roles', auth: ['Admin'] },
@@ -66,6 +70,50 @@ module.exports = function (router, db){
             res.send({error: true, reason: 'missing fields, expected email and password'});
         }
     });
+    router.post('/lostPassword', function(req, res, next){
+        if(req.body && req.body.email){
+            const invalids = validators.lostPassword(req.body);
+            if(invalids.length > 0){
+                res.send({error: true, reason: 'invalid fields', errors: invalids});
+            } else {
+                db.UserCrud.getByFields({
+                   email: req.body.email
+                }, function(response){
+                    if(response.error){
+                        res.send(response);
+                    } else {
+                        const password = faker.random.word() + faker.random.word();
+                        bcrypt.hash(password, 10, function(err, hash){
+                            if(err){
+                                res.send({error: true, reason: 'hash error'});
+                                return;
+                            } else if(!hash){
+                                res.send({error: true, reason: 'hash error'});
+                                return;
+                            } else {
+                                response[0].password = hash;
+                                db.UserCrud.update(response[0], function(result){
+                                    if (result.error) {
+                                        res.send(result);
+                                    } else {
+                                        Email.sendEmail({
+                                            emailTo: result.email,
+                                            email: 'Password has been reset to: ' + password
+                                        }, function(emailResult){
+                                            res.send(emailResult);
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        } else {
+            res.send({error: true, reason: 'missing fields, expected email and password'});
+        }
+    });
+
     router.post('/updatePassword', function(req, res, next){
         if(!req.headers.session){
             res.send({error: true, reason: 'no auth, only the user can update thier password'});
@@ -129,12 +177,12 @@ module.exports = function (router, db){
                         res.send({error: true, reason: 'user already has that role'});
                         return;
                     }
-                    userResult.roles.push(roleResult);
+                    userResult.roles.push(roleResult._id);
                     db.UserCrud.update(userResult, function(saveResult){
                         res.send(saveResult)
                     });
                 });
-            });
+            }, 'roles');
         }
     });
     router.post('/revokeRole', function(req, res, next){
@@ -199,6 +247,13 @@ const validators = {
 
         const passwordInvalid = Validation(body.password, {req: true});
         if(passwordInvalid.length > 0) invalids.push({field: 'password', reasons: invalids});
+        return invalids;
+    },
+    lostPassword: function(body){
+        const invalids = [];
+
+        const emailInvalid = Validation(body.email, {req: true, email: true});
+        if(emailInvalid.length > 0) invalids.push({field: 'email', reasons: invalids});
         return invalids;
     },
     roleValidator: function(body){

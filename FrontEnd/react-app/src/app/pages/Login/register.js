@@ -24,16 +24,15 @@ class Register extends Component {
             passwordErrors: [],
             password2: '',
             passwordErrors2: [],
-
+            redirectLogin: false
         };
     }
 
     componentDidMount(){
     }
 
-    submitLogin(event){
+    register(event){
         event.preventDefault();
-        console.log(this.state.password !== this.state.password2);
         let errors = false;
 
         let emailErrors = InputValidation(this.state.email, {req: true, email: true});
@@ -54,31 +53,26 @@ class Register extends Component {
 
         if(!errors){
             let self = this;
-            dataAccess.Account.login({email: this.state.email, password: this.state.password}, result => {
+            dataAccess.Account.register({email: this.state.email, password: this.state.password}, result => {
                 console.log(result);
                 if(result.error){
-                    self.props.UpdateSiteSettings({...this.props.SiteSettings, toastType: 'error', toastTitle: 'Login Failure', toastBody: 'Incorrect email and/or password', toastTimeout: 3})
+                    self.props.UpdateSiteSettings({...this.props.SiteSettings, toastType: 'error', toastTitle: 'Register Failure', toastBody: result.reason, toastTimeout: 3})
                 } else {
-                    self.props.UpdateSiteSettings({...this.props.SiteSettings, sessionToken: result.token, roles: [...result.roles],
-                        toastType: 'success', toastTitle: 'Login Successful', toastBody: 'You have logged in', toastTimeout: 3});
-                    document.cookie = JSON.stringify(result);
+                    self.props.UpdateSiteSettings({...this.props.SiteSettings,
+                        toastType: 'success', toastTitle: 'Registration Successful', toastBody: 'You have registered and can now login', toastTimeout: 3});
+                    this.setState({redirectLogin: true});
                 }
             })
         }
 
     }
 
-    register(event){
-        event.preventDefault();
-        console.log('register')
-    }
-
-    lostPassword(event){
-        event.preventDefault();
-        console.log('lostPassword')
-    }
-
     render() {
+        if(this.state.redirectLogin){
+            return(
+                <Redirect to={'/login'}/>
+            )
+        }
         if(this.props.SiteSettings.sessionToken){
             return(
                 <Redirect to={'/'}/>
@@ -88,7 +82,7 @@ class Register extends Component {
             <div className="login">
                 <div className="row text-center">
                     <div className="col-sm-3"></div>
-                    <form className="text-left form col-sm-6" onSubmit={event => this.submitLogin(event)}>
+                    <form className="text-left form col-sm-6" onSubmit={event => this.register(event)}>
                         <div className="form-group formInput">
                             <label>Email:</label>
                             <input placeholder="bill@aol.com" value={this.state.email}

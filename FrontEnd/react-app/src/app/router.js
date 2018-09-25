@@ -13,6 +13,7 @@ import home from "./pages/Home/home";
 import register from './pages/Login/register';
 
 import './shared.css';
+import lostPassword from "./pages/Login/lostPassword";
 
 
 // this is for the header buttons to match up with links in one file
@@ -42,6 +43,7 @@ class Router extends Component {
                     <Switch>
                         <Route path="/login" component={login}/>
                         <Route path="/register" component={register}/>
+                        <Route path="/lostPassword" component={lostPassword}/>
                         <Route path="/" component={home}/>
                     </Switch>
                 </div>

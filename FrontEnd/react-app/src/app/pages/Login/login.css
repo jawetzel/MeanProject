@@ -42,7 +42,7 @@
     display: flex;
     flex-wrap: wrap;
 }
-.login .form .formButton > button{
+.login .form .formButton > a, button{
     flex-grow: 1;
 
     display: -webkit-flex;
@@ -51,9 +51,11 @@
     justify-content: center;
 
     border-radius: 10px;
-    padding: 4px;
     font-size: 12px;
     font-weight: bold;
+}
+.login .form .formButton > a > div{
+    width: 100%;
 }
 .login .form ul{
     color: darkred;

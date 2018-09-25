@@ -10,9 +10,9 @@ import dataAccess from '../../dataAccess';
 
 import './login.css';
 import '../../shared.css';
-import {Link, Redirect} from "react-router-dom";
+import {Redirect} from "react-router-dom";
 
-class Login extends Component {
+class LostPassword extends Component {
     constructor(props) {
         super(props);
 
@@ -21,49 +21,46 @@ class Login extends Component {
             email: '',
             emailErrors: [],
             password: '',
-            passwordErrors: []
-
+            passwordErrors: [],
+            password2: '',
+            passwordErrors2: [],
+            redirectLogin: false
         };
     }
 
     componentDidMount(){
     }
 
-    submitLogin(event){
+    register(event){
         event.preventDefault();
-
         let errors = false;
 
         let emailErrors = InputValidation(this.state.email, {req: true, email: true});
         this.setState({emailErrors: emailErrors});
         if(emailErrors.length > 0) errors = true;
 
-        let passwordErrors = InputValidation(this.state.password, {req: true});
-        this.setState({passwordErrors: passwordErrors});
-        if(passwordErrors.length > 0) errors = true;
-
         if(!errors){
             let self = this;
-            dataAccess.Account.login({email: this.state.email, password: this.state.password}, result => {
+            dataAccess.Account.lostPassword({email: this.state.email}, result => {
                 console.log(result);
                 if(result.error){
-                    self.props.UpdateSiteSettings({...this.props.SiteSettings, toastType: 'error', toastTitle: 'Login Failure', toastBody: 'Incorrect email and/or password', toastTimeout: 3})
+                    self.props.UpdateSiteSettings({...this.props.SiteSettings, toastType: 'error', toastTitle: 'Reset Failure', toastBody: result.reason, toastTimeout: 3})
                 } else {
-                    self.props.UpdateSiteSettings({...this.props.SiteSettings, sessionToken: result.token, roles: [...result.roles],
-                        toastType: 'success', toastTitle: 'Login Successful', toastBody: 'You have logged in', toastTimeout: 3});
-                    document.cookie = JSON.stringify(result);
+                    self.props.UpdateSiteSettings({...this.props.SiteSettings,
+                        toastType: 'success', toastTitle: 'Password Reset', toastBody: 'Check your email, your password has been reset', toastTimeout: 3});
+                    this.setState({redirectLogin: true});
                 }
             })
         }
 
     }
 
-    lostPassword(event){
-        event.preventDefault();
-        console.log('lostPassword')
-    }
-
     render() {
+        if(this.state.redirectLogin){
+            return(
+                <Redirect to={'/login'}/>
+            )
+        }
         if(this.props.SiteSettings.sessionToken){
             return(
                 <Redirect to={'/'}/>
@@ -73,7 +70,7 @@ class Login extends Component {
             <div className="login">
                 <div className="row text-center">
                     <div className="col-sm-3"></div>
-                    <form className="text-left form col-sm-6" onSubmit={event => this.submitLogin(event)}>
+                    <form className="text-left form col-sm-6" onSubmit={event => this.register(event)}>
                         <div className="form-group formInput">
                             <label>Email:</label>
                             <input placeholder="bill@aol.com" value={this.state.email}
@@ -87,26 +84,8 @@ class Login extends Component {
                             </ul>
                         </div>
 
-                        <div className="form-group formInput">
-                            <label>Password:</label>
-                            <input type="password"  value={this.state.password}
-                                   onChange={event => this.setState({password: event.target.value})}/>
-                            <ul>
-                                {this.state.passwordErrors.map((error, index) => {
-                                    return(
-                                        <li key={error + index}>{error}</li>
-                                    );
-                                })}
-                            </ul>
-                        </div>
-
                         <div className="form-group formButtonMax text-center">
-                            <button type="submit" className="btn btn-info">Login</button>
-                        </div>
-
-                        <div className="form-group formButton text-center">
-                            <Link to={'/register'}><div className="btn btn-info">Register</div></Link>
-                            <Link to={'/lostPassword'}><div className="btn btn-info">Lost Password</div></Link>
+                            <button type="submit" className="btn btn-info">Lost Password</button>
                         </div>
                     </form>
                     <div className="col-sm-3"></div>
@@ -129,4 +108,4 @@ function mapDispatchToProps(dispatch) {
 }
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(Login);
+export default connect(mapStateToProps, mapDispatchToProps)(LostPassword);

@@ -86,6 +86,7 @@ const BaseCrud = function(table){
             });
         },
         update: function(model, callback) {
+            console.log(model);
             table.findOneAndUpdate({_id: model._id}, {$set: model}, function (err, result) {
                 if(err){
                     callback({error: true, reason: 'error updating table item'});
@@ -129,7 +130,7 @@ const AccountCrud = function(userTable, sessionTable, roleTable){
             })
         },
         login: function(model, callback) {
-            userTable.findOne({ email: model.data.email }).exec((err, result) => {
+            userTable.findOne({ email: model.data.email }).populate('roles').exec((err, result) => {
                 if (err){
                     callback({error: true, reason: 'could not find user'});
                 } else if(!result){
@@ -175,6 +176,7 @@ const AccountCrud = function(userTable, sessionTable, roleTable){
                         } else {
                             user.password = hash;
                             user.save(function(err, result){
+                                console.log(err);
                                 if (err) {
                                     callback({error: true, reason: 'failed to save'});
                                 } else if (!result){
