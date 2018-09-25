@@ -1,0 +1,61 @@
+.login{
+    padding: 20px;
+}
+.form{
+    border-radius: 20px;
+    padding: 20px;
+    background-color: rgba(255,255,255,.9);
+}
+.login .form .formInput > label{
+    width: 75px;
+}
+.login .form .formInput > input{
+    width: calc(100% - 75px);
+    border-radius: 10px;
+    padding: 5px;
+}
+.login .form .formButtonMax > button{
+    width: 100%;
+    border-radius: 10px;
+    padding: 5px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.login .form .formButtonMax > button{
+    width: 100%;
+    border-radius: 10px;
+    padding: 5px;
+    font-size: 15px;
+    font-weight: bold;
+}
+.login .form div{
+    border-radius: 10px;
+}
+.login .form div a{
+    text-decoration: none;
+    color: inherit;
+}
+
+.login .form .formButton{
+    display: -webkit-flex;
+    display: flex;
+    flex-wrap: wrap;
+}
+.login .form .formButton > button{
+    flex-grow: 1;
+
+    display: -webkit-flex;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+    padding: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+.login .form ul{
+    color: darkred;
+    font-size: 15px;
+}

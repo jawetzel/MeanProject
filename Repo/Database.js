@@ -1,6 +1,6 @@
 var mongoose = require("mongoose");
 
-var CrudFactory = require('./crudFactory');
+var CrudFactory = require('../utilities/crudFactory');
 var Schemas = require('./Schemas');
 
 
