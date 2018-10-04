@@ -10,7 +10,7 @@ const endpoints = [  //endpoints needing auth go here, others will be let throug
     { method: 'PUT', url: '/users', auth: ['Admin'] },
     { method: 'DELETE', url: '/users', auth: ['Admin'] },
 
-    //{ method: 'POST', url: '/grantRole', auth: ['Admin'] },
+    { method: 'POST', url: '/grantRole', auth: ['Admin'] },
     { method: 'POST', url: '/revokeRole', auth: ['Admin'] },
 
     { method: 'GET', url: '/roles', auth: ['Admin'] },
@@ -86,10 +86,8 @@ module.exports = function (router, db){
                         bcrypt.hash(password, 10, function(err, hash){
                             if(err){
                                 res.send({error: true, reason: 'hash error'});
-                                return;
                             } else if(!hash){
                                 res.send({error: true, reason: 'hash error'});
-                                return;
                             } else {
                                 response[0].password = hash;
                                 db.UserCrud.update(response[0], function(result){
@@ -113,7 +111,6 @@ module.exports = function (router, db){
             res.send({error: true, reason: 'missing fields, expected email and password'});
         }
     });
-
     router.post('/updatePassword', function(req, res, next){
         if(!req.headers.session){
             res.send({error: true, reason: 'no auth, only the user can update thier password'});

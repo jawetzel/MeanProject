@@ -14,14 +14,7 @@ import register from './pages/Login/register';
 
 import './shared.css';
 import lostPassword from "./pages/Login/lostPassword";
-
-
-// this is for the header buttons to match up with links in one file
-
-export var Routes = [
-    { title: 'Home', path: '/' },
-    { title: 'Login', path: '/login' }
-];
+import editAccount from "./pages/Account/editAccount";
 
 class Router extends Component {
     constructor(props) {
@@ -44,6 +37,9 @@ class Router extends Component {
                         <Route path="/login" component={login}/>
                         <Route path="/register" component={register}/>
                         <Route path="/lostPassword" component={lostPassword}/>
+                        {this.props.SiteSettings.sessionToken &&
+                        <Route path="/editAccount" component={editAccount}/>
+                        }
                         <Route path="/" component={home}/>
                     </Switch>
                 </div>

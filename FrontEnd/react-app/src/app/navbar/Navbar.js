@@ -39,7 +39,10 @@ class Navbar extends Component {
 
                     <div className="collapse navbar-collapse" id="myNavbar">
                         <ul className="nav navbar-nav navbar-right">
-                            <li className="active"><Link to={'/'}>Home</Link></li>
+                            <li><Link to={'/'}>Home</Link></li>\
+                            {this.props.SiteSettings.sessionToken &&
+                            <li><Link to={'/editAccount'}>Account</Link></li>
+                            }
                             {!this.props.SiteSettings.sessionToken &&
                             <li><Link to={'/login'} href="#"><span className="glyphicon glyphicon-log-in"></span> Login</Link></li>
                             }
